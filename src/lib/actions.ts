@@ -126,6 +126,22 @@ export async function closeRoom(roomId: string): Promise<void> {
   })
 }
 
+export async function deleteRoom(roomId: string): Promise<void> {
+  const email = await getUserEmail()
+  if (!email) throw new Error('Unauthorized')
+
+  const db = getDb()
+  const roomRef = db.collection('rooms').doc(roomId)
+  const snap = await roomRef.get()
+  if (!snap.exists) throw new Error('Room not found')
+
+  const data = snap.data() as RoomDocument
+  if (!data.participants.includes(email)) throw new Error('Not a participant')
+
+  await roomRef.delete()
+  redirect('/')
+}
+
 export async function nextRound(roomId: string): Promise<void> {
   const email = await getUserEmail()
   if (!email) throw new Error('Unauthorized')
