@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 
 import { RoomClient } from '@/components/RoomClient'
 import { joinRoom } from '@/lib/actions'
@@ -17,18 +17,19 @@ export default async function RoomPage({ params }: Props) {
 
   if (!email) throw new Error('Unauthorized')
 
-  // 部屋に参加（未参加なら追加）
+  const snap = await getDb().collection('rooms').doc(roomId).get()
+  if (!snap.exists) redirect('/')
+
+  const data = snap.data() as RoomDocument
+  if (data.status === 'closed') redirect('/')
+
   try {
     await joinRoom(roomId)
   } catch (error) {
-    if (error instanceof Error && error.message === 'Room not found') notFound()
+    if (error instanceof Error && error.message === 'Room not found') redirect('/')
     throw error
   }
 
-  const snap = await getDb().collection('rooms').doc(roomId).get()
-  if (!snap.exists) notFound()
-
-  const data = snap.data() as RoomDocument
   const initialRoom = buildClientData(roomId, data)
 
   return <RoomClient initialRoom={initialRoom} userEmail={email} />

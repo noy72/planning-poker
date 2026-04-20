@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-import { nextRound } from '@/lib/actions'
+import { closeRoom, nextRound } from '@/lib/actions'
 
 interface Props {
   roomId: string
@@ -22,6 +22,15 @@ export function RevealedCards({ roomId, participants, votes, stats, isHost }: Pr
       await nextRound(roomId)
     } catch {
       setError('次のラウンドの開始に失敗しました。もう一度お試しください。')
+    }
+  }
+
+  async function handleCloseRoom() {
+    setError(null)
+    try {
+      await closeRoom(roomId)
+    } catch {
+      setError('ルームのクローズに失敗しました。もう一度お試しください。')
     }
   }
 
@@ -61,15 +70,25 @@ export function RevealedCards({ roomId, participants, votes, stats, isHost }: Pr
       </div>
 
       {isHost && (
-        <form action={handleNextRound}>
-          {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
-          <button
-            type="submit"
-            className="w-full rounded-lg bg-indigo-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-indigo-700 active:bg-indigo-800"
-          >
-            次のラウンドを開始する
-          </button>
-        </form>
+        <div className="space-y-3">
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <form action={handleNextRound}>
+            <button
+              type="submit"
+              className="w-full rounded-lg bg-indigo-600 px-6 py-3 text-base font-semibold text-white transition hover:bg-indigo-700 active:bg-indigo-800"
+            >
+              次のラウンドを開始する
+            </button>
+          </form>
+          <form action={handleCloseRoom}>
+            <button
+              type="submit"
+              className="w-full rounded-lg border border-gray-300 bg-white px-6 py-3 text-base font-semibold text-gray-600 transition hover:bg-gray-50 active:bg-gray-100"
+            >
+              ルームを閉じる
+            </button>
+          </form>
+        </div>
       )}
     </div>
   )

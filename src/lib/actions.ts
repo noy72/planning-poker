@@ -56,6 +56,7 @@ export async function joinRoom(roomId: string): Promise<void> {
     if (!snap.exists) throw new Error('Room not found')
 
     const data = snap.data() as RoomDocument
+    if (data.status === 'closed') throw new Error('Room is closed')
     if (data.participants.includes(email)) return
 
     // メールアドレスにドットが含まれるため、Firestoreのドット記法（フィールドパス区切り）を
@@ -101,6 +102,27 @@ export async function vote(roomId: string, card: CardValue): Promise<void> {
         lastActivityAt: FieldValue.serverTimestamp(),
       })
     }
+  })
+}
+
+export async function closeRoom(roomId: string): Promise<void> {
+  const email = await getUserEmail()
+  if (!email) throw new Error('Unauthorized')
+
+  const db = getDb()
+  const roomRef = db.collection('rooms').doc(roomId)
+
+  await db.runTransaction(async (tx) => {
+    const snap = await tx.get(roomRef)
+    if (!snap.exists) throw new Error('Room not found')
+
+    const data = snap.data() as RoomDocument
+    if (data.hostEmail !== email) throw new Error('Only host can close the room')
+
+    tx.update(roomRef, {
+      status: 'closed',
+      lastActivityAt: FieldValue.serverTimestamp(),
+    })
   })
 }
 
