@@ -16,6 +16,8 @@ export async function GET(
   const encoder = new TextEncoder()
   const db = getDb()
 
+  const TIMEOUT_MS = 30 * 60 * 1000
+
   const stream = new ReadableStream({
     start(controller) {
       const unsubscribe = db
@@ -24,11 +26,18 @@ export async function GET(
         .onSnapshot(
           (snapshot) => {
             if (!snapshot.exists) {
+              controller.enqueue(encoder.encode('event: room-closed\ndata: {}\n\n'))
               controller.close()
               return
             }
 
             const raw = snapshot.data() as RoomDocument
+
+            if (raw.status === 'closed') {
+              controller.enqueue(encoder.encode('event: room-closed\ndata: {}\n\n'))
+              controller.close()
+              return
+            }
 
             if (!raw.participants.includes(email)) {
               controller.close()
@@ -45,7 +54,13 @@ export async function GET(
           },
         )
 
+      const timeoutId = setTimeout(() => {
+        unsubscribe()
+        controller.close()
+      }, TIMEOUT_MS)
+
       request.signal.addEventListener('abort', () => {
+        clearTimeout(timeoutId)
         unsubscribe()
         controller.close()
       })

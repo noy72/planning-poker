@@ -17,22 +17,44 @@ export function RoomClient({ initialRoom, userEmail }: Props) {
   const [room, setRoom] = useState<RoomClientData>(initialRoom)
 
   useEffect(() => {
-    const es = new EventSource(`/api/rooms/${initialRoom.id}/events`)
+    let es: EventSource | null = null
 
-    es.onmessage = (e: MessageEvent<string>) => {
-      try {
-        setRoom(JSON.parse(e.data) as RoomClientData)
-      } catch {
-        // JSON パース失敗は無視する
+    const connect = () => {
+      es = new EventSource(`/api/rooms/${initialRoom.id}/events`)
+
+      es.onmessage = (e: MessageEvent<string>) => {
+        try {
+          setRoom(JSON.parse(e.data) as RoomClientData)
+        } catch {
+          // JSON パース失敗は無視する
+        }
+      }
+
+      es.onerror = () => {
+        // close() を呼ばず EventSource の自動再接続に委ねる
+      }
+
+      es.addEventListener('room-closed', () => {
+        es?.close()
+        window.location.href = '/'
+      })
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        es?.close()
+        es = null
+      } else {
+        connect()
       }
     }
 
-    es.onerror = () => {
-      // close() を呼ばず EventSource の自動再接続に委ねる
-    }
+    connect()
+    document.addEventListener('visibilitychange', handleVisibilityChange)
 
     return () => {
-      es.close()
+      es?.close()
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
     }
   }, [initialRoom.id])
 
