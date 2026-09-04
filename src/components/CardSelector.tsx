@@ -8,9 +8,16 @@ import { CARD_VALUES, type CardValue } from '@/lib/types'
 interface Props {
   roomId: string
   myVote: boolean // 投票済みかどうか
+  hideVotedCard: boolean
+  onHideVotedCardChange: (hide: boolean) => void
 }
 
-export function CardSelector({ roomId, myVote }: Props) {
+export function CardSelector({
+  roomId,
+  myVote,
+  hideVotedCard,
+  onHideVotedCardChange,
+}: Props) {
   const [selectedCard, setSelectedCard] = useState<CardValue | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -38,7 +45,9 @@ export function CardSelector({ roomId, myVote }: Props) {
             key={card}
             onClick={() => handleVote(card)}
             className={`h-16 w-12 rounded-lg border-2 text-xl font-bold shadow-sm transition active:scale-95 ${
-              card === selectedCard
+              hideVotedCard && (myVote || selectedCard !== null)
+                ? 'card-vote-hidden border-indigo-300 text-indigo-700'
+                : card === selectedCard
                 ? 'border-indigo-600 bg-indigo-600 text-white'
                 : 'border-indigo-300 bg-white text-indigo-700 hover:border-indigo-600 hover:bg-indigo-50'
             }`}
@@ -47,6 +56,15 @@ export function CardSelector({ roomId, myVote }: Props) {
           </button>
         ))}
       </div>
+      <label className="mt-4 inline-flex cursor-pointer items-center gap-2 text-xs text-gray-500 hover:text-gray-700">
+        <input
+          type="checkbox"
+          checked={hideVotedCard}
+          onChange={(event) => onHideVotedCardChange(event.target.checked)}
+          className="h-3.5 w-3.5 accent-indigo-600"
+        />
+        投票したカードを隠す
+      </label>
     </div>
   )
 }
