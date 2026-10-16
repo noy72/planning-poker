@@ -15,6 +15,7 @@ interface Props {
 
 export function RoomClient({ initialRoom, userEmail }: Props) {
   const [room, setRoom] = useState<RoomClientData>(initialRoom)
+  const [hideVotedCard, setHideVotedCard] = useState(false)
 
   useEffect(() => {
     let es: EventSource | null = null
@@ -84,7 +85,12 @@ export function RoomClient({ initialRoom, userEmail }: Props) {
         <div className="rounded-xl bg-white p-6 shadow">
           {room.status === 'voting' ? (
             <div className="space-y-6">
-              <CardSelector roomId={room.id} myVote={Boolean(myVote)} />
+              <CardSelector
+                roomId={room.id}
+                myVote={Boolean(myVote)}
+                hideVotedCard={hideVotedCard}
+                onHideVotedCardChange={setHideVotedCard}
+              />
               <VotingStatus participants={room.participants} votes={room.votes} />
             </div>
           ) : (

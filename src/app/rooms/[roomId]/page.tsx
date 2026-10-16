@@ -1,4 +1,4 @@
-import { notFound, redirect } from 'next/navigation'
+import { redirect } from 'next/navigation'
 
 import { RoomClient } from '@/components/RoomClient'
 import { joinRoom } from '@/lib/actions'
