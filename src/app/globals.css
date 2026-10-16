@@ -26,12 +26,12 @@ body {
 }
 
 .card-vote-hidden {
-  background-color: #eef2ff;
+  background-color: var(--color-indigo-50);
   background-image: repeating-linear-gradient(
     -45deg,
     transparent,
     transparent 4px,
-    rgb(99 102 241 / 0.45) 4px,
-    rgb(99 102 241 / 0.45) 8px
+    --alpha(var(--color-indigo-500) / 45%) 4px,
+    --alpha(var(--color-indigo-500) / 45%) 8px
   );
 }
