@@ -1,6 +1,6 @@
 'use server'
 
-import { FieldValue } from 'firebase-admin/firestore'
+import { FieldValue } from '@google-cloud/firestore'
 import { redirect } from 'next/navigation'
 
 import { getUserEmail } from './auth'

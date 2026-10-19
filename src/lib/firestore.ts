@@ -1,14 +1,9 @@
-import { getApps, initializeApp } from 'firebase-admin/app'
-import { getFirestore } from 'firebase-admin/firestore'
+import { Firestore } from '@google-cloud/firestore'
 
-function initFirebase() {
-  if (!getApps().length) {
-    initializeApp()
-  }
-  return getFirestore()
-}
+let db: Firestore | undefined
 
 // 関数として呼び出すことでモジュールロード時の初期化を避ける
 export function getDb() {
-  return initFirebase()
+  db ??= new Firestore()
+  return db
 }

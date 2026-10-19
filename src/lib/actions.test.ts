@@ -15,7 +15,7 @@ vi.mock('@/lib/firestore', () => ({
   getDb: vi.fn(),
 }))
 
-vi.mock('firebase-admin/firestore', () => ({
+vi.mock('@google-cloud/firestore', () => ({
   FieldValue: {
     serverTimestamp: () => 'SERVER_TIMESTAMP',
     arrayUnion: (val: string) => ({ _type: 'arrayUnion', val }),
